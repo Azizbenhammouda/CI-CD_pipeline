@@ -34,7 +34,7 @@ A full-stack web application (Node.js backend + React frontend) deployed to **Az
 
 ##  Project Structure
 
-
+```tree
 project-root/
 │
 ├─ backend/ # Node.js backend
@@ -52,7 +52,7 @@ project-root/
 ├─ Dockerfile # Backend Dockerfile
 ├─ frontend.Dockerfile # Frontend Dockerfile
 └─ README.md
-
+```
 
 ---
 
