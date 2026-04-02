@@ -1,6 +1,7 @@
 # Simple Web App with CI/CD to Azure
 
 A full-stack web application (Node.js backend + React frontend) deployed to **Azure Container Apps** with **GitHub Actions CI/CD**.
+
 ![Architecture](architecture/01_overview.png)
 
 ---
