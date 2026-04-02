@@ -1,0 +1,66 @@
+name: CI
+on: 
+  workflow_dispatch:
+    inputs:
+      username:  
+        description: "say hi to someone"
+        required: true
+        default: "aziz"
+permissions:
+  contents: read
+  packages: write
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: devtrack_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: clone
+        uses: actions/checkout@v4
+      - name: setting js
+        uses: actions/setup-node@v4
+      - name: install backend dependancies
+        run: |
+          cd backend
+          npm ci
+      - name: run linting back
+        run: |
+          cd backend
+          npm run lint
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm test
+      - name: install frontedn dependancies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: run linting front
+        run: |
+          cd frontend
+          npm run lint
+      - name: build the app
+        run: |
+          cd frontend
+          npm run build
+      - name: frontend image
+        run:  docker build -t front ./frontend
+      - name: backend image
+        run:  docker build -t back ./backend
+      
+
+        

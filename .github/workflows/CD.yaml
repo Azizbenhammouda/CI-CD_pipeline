@@ -1,0 +1,58 @@
+name: CD
+on: 
+  workflow_run:
+    workflows: ["CI"] 
+    types:
+      - completed
+jobs:
+  push-images-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    permissions:
+        contents: read 
+        packages: write
+    steps:
+      - name: clone 
+        uses: actions/checkout@v4
+      - name: log in GHCR
+        run:  echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        #back
+      - name: build image back
+        run: |
+          cd backend
+          docker build . --tag ghcr.io/${{ github.actor }}/backend:latest
+      - name: push to registry
+        run: |
+          cd backend
+          docker push ghcr.io/${{ github.actor }}/backend:latest
+        # front
+      - name: build image front
+        run: |
+          cd frontend
+          docker build . --tag ghcr.io/${{ github.actor }}/frontend:latest
+      - name: push to registry
+        run: |
+          cd frontend
+          docker push ghcr.io/${{ github.actor }}/frontend:latest
+        # deploy to azure
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy Backend
+        run: |
+            az containerapp update \
+            --name backend-app \
+            --resource-group my-app-rg \
+            --image ghcr.io/${{ github.actor }}/backend:latest
+
+      - name: Deploy Frontend
+        run: |
+            az containerapp update \
+            --name frontend-app \
+            --resource-group my-app-rg \
+            --image ghcr.io/${{ github.actor }}/frontend:latest
+
+        
+
